@@ -1,0 +1,65 @@
+# Created by Terrence Gareau "tuna" for honeypot project
+
+# Used Jason Smith's setup as a base 
+# Great Blog post http://www.appliednsm.com/parsing-bro-logs-with-logstash/
+# http://blog.lusis.org/blog/2012/01/31/load-balancing-logstash-with-amqp/
+#
+# https://home.regit.org/2014/01/a-bit-of-logstash-cooking/ geoip
+# https://home.regit.org/tag/logstash/
+#Logs being parsed:
+#ssh_auth.log
+
+input {
+
+#Production Logs#############################
+
+  file {
+    type => "SSHPOT_sshlog"
+    path => "/var/log/sshpot_auth.log"
+  }
+
+###################################################
+}
+
+filter {
+  if [message] =~ /^#/ {
+    drop {  }
+  } else {
+  
+# SSHPOT_sshlog ######################
+  if [type] == "SSHPOT_sshlog" {
+      grok { 
+        match => [ "message", "(?<ts>(.*?))\t(?<id.orig_h>(.*?))\t(?<user>(.*?))\t(?<pass>(.*?))\t" ]
+      }
+  }
+}
+  if [id.orig_h]  {
+    geoip {
+      source => "id.orig_h"
+      target => "geoip"
+      add_field => [ "[geoip][coordinates]", "%{[geoip][longitude]}" ]
+      add_field => [ "[geoip][coordinates]", "%{[geoip][latitude]}"  ]
+    }
+    mutate {
+      convert => [ "[geoip][coordinates]", "float" ]
+    } 
+    mutate {
+      uppercase => [ "geoip.country_code2" ]
+    }
+  }
+}
+
+output {
+  rabbitmq {
+     user => "amp"
+     exchange_type => "direct"
+     password => "password"
+     exchange => "amqp"
+     vhost => "/"
+     durable => true
+     ssl => true
+     port => 5671
+     persistent => true
+     host => "hostname"
+  }
+}
