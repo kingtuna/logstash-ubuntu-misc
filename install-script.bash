@@ -1,5 +1,6 @@
-
-neypot Install Script	####
+####################################################
+####						####
+#### honeypot Install Script               	####
 #### tuna@people.ops-trust.net			####
 ####						####
 ####################################################
@@ -185,9 +186,9 @@ mv GeoLiteCity.dat  /usr/share/GeoIP/GeoLiteCity.dat
 mv GeoLiteCityv6.dat /usr/share/GeoIP/GeoLiteCityv6.dat
 ln -s /usr/share/GeoIP/GeoLiteCity.dat /usr/share/GeoIP/GeoIPCity.dat
 ln -s /usr/share/GeoIP/GeoLiteCityv6.dat /usr/share/GeoIP/GeoIPCityv6.dat
-wget http://www.bro.org/downloads/release/bro-2.3.tar.gz
-tar -xvzf bro-2.3.tar.gz
-cd bro-2.3
+wget https://www.bro.org/downloads/release/bro-2.3.2.tar.gz
+tar -xvzf bro-*.tar.gz
+cd bro-2.*
 ./configure --prefix=/nsm/bro
 make
 make install
